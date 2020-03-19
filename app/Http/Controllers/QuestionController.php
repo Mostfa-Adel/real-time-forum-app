@@ -4,6 +4,9 @@ namespace App\Http\Controllers;
 
 use App\Question;
 use Illuminate\Http\Request;
+use App\Http\Requests\QuestionRequest;
+use Illuminate\Http\Response;
+use App\Http\Resources\QuestionResource;
 
 class QuestionController extends Controller
 {
@@ -14,17 +17,8 @@ class QuestionController extends Controller
      */
     public function index()
     {
-        //
-    }
-
-    /**
-     * Show the form for creating a new resource.
-     *
-     * @return \Illuminate\Http\Response
-     */
-    public function create()
-    {
-        //
+        $data['questions']= QuestionResource::collection(Question::latest()->get());
+        return response($data,Response::HTTP_OK) ;
     }
 
     /**
@@ -33,9 +27,13 @@ class QuestionController extends Controller
      * @param  \Illuminate\Http\Request  $request
      * @return \Illuminate\Http\Response
      */
-    public function store(Request $request)
+    public function store(QuestionRequest $request)
     {
-        //
+        //create
+        Question::create($request);
+        $data['message']='question created successfully';
+        return response()->json($data,Response::HTTP_CREATED);
+
     }
 
     /**
@@ -46,18 +44,8 @@ class QuestionController extends Controller
      */
     public function show(Question $question)
     {
-        //
-    }
-
-    /**
-     * Show the form for editing the specified resource.
-     *
-     * @param  \App\Question  $question
-     * @return \Illuminate\Http\Response
-     */
-    public function edit(Question $question)
-    {
-        //
+        $data['question']=new QuestionResource($question);
+        return response()->json($data,Response::HTTP_FOUND);
     }
 
     /**
@@ -67,9 +55,11 @@ class QuestionController extends Controller
      * @param  \App\Question  $question
      * @return \Illuminate\Http\Response
      */
-    public function update(Request $request, Question $question)
+    public function update(QuestionRequest $request, Question $question)
     {
-        //
+        $question->update($request->all());
+        $data['message']="Updated Successfully";
+        return response()->json($data,Response::HTTP_ACCEPTED);
     }
 
     /**
@@ -80,6 +70,8 @@ class QuestionController extends Controller
      */
     public function destroy(Question $question)
     {
-        //
+        $question->delete();
+        $data['message']="Deleted Successfully";
+        return response($data,Response::HTTP_NO_CONTENT);
     }
 }

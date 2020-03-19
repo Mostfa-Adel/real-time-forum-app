@@ -4,6 +4,9 @@ namespace App\Http\Controllers;
 
 use App\Category;
 use Illuminate\Http\Request;
+use App\Http\Requests\CategoryRequest;
+use Illuminate\Http\Response;
+use App\Http\Resources\CategoryResource;
 
 class CategoryController extends Controller
 {
@@ -14,17 +17,8 @@ class CategoryController extends Controller
      */
     public function index()
     {
-        //
-    }
-
-    /**
-     * Show the form for creating a new resource.
-     *
-     * @return \Illuminate\Http\Response
-     */
-    public function create()
-    {
-        //
+        $data['categories']= CategoryResource::collection(Category::get());
+        return response($data,Response::HTTP_OK) ;
     }
 
     /**
@@ -33,9 +27,13 @@ class CategoryController extends Controller
      * @param  \Illuminate\Http\Request  $request
      * @return \Illuminate\Http\Response
      */
-    public function store(Request $request)
+    public function store(CategoryRequest $request)
     {
         //
+        Category::create($request);
+        $data['message']='category created successfully';
+        return response()->json($data,Response::HTTP_CREATED);
+
     }
 
     /**
@@ -46,18 +44,9 @@ class CategoryController extends Controller
      */
     public function show(Category $category)
     {
-        //
-    }
-
-    /**
-     * Show the form for editing the specified resource.
-     *
-     * @param  \App\Category  $category
-     * @return \Illuminate\Http\Response
-     */
-    public function edit(Category $category)
-    {
-        //
+        $data['category']=new CategoryResource($category);
+        return response()->json($data,Response::HTTP_FOUND);
+    
     }
 
     /**
@@ -67,9 +56,11 @@ class CategoryController extends Controller
      * @param  \App\Category  $category
      * @return \Illuminate\Http\Response
      */
-    public function update(Request $request, Category $category)
+    public function update(CategoryRequest $request, Category $category)
     {
-        //
+        $category->update($request->all());
+        $data['message']="Updated Successfully";
+        return response()->json($data,Response::HTTP_ACCEPTED);
     }
 
     /**
@@ -80,6 +71,8 @@ class CategoryController extends Controller
      */
     public function destroy(Category $category)
     {
-        //
+        $category->delete();
+        $data['message']="Deleted Successfully";
+        return response($data,Response::HTTP_NO_CONTENT);
     }
 }

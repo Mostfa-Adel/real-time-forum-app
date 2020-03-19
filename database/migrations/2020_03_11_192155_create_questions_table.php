@@ -17,16 +17,14 @@ class CreateQuestionsTable extends Migration
             $table->id();
             $table->timestamps();
             $table->string('title');
-            $table->string('slug');
+            $table->string('slug')->unique();
             $table->text('body');
 
-            $table->integer('ctaegory_id')->unsigned();
-            $table->foreign('category_id')->refrences('id')->on('categories')->oncascade('delete');
-            
+            $table->integer('category_id')->unsigned();            
             $table->integer('user_id')->unsigned();
-            $table->foreign('user_id')->refrences('id')->on('users')->oncascade('delete');
 
         });
+        
     }
 
     /**
