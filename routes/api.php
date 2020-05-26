@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\LikeController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
@@ -13,14 +14,18 @@ use Illuminate\Support\Facades\Route;
 | is assigned the "api" middleware group. Enjoy building your API!
 |
 */
+Route::get('/category', 'CategoryController@index');
+Route::get('/question', 'QuestionController@index');
+Route::get('category/{category}/question','QuestionController@getCategorized');
 
-Route::middleware('auth:api')->get('/user', function (Request $request) {
-    return $request->user();
-});
-Route::post('login','AuthController@login');
-Route::middleware('auth')->group(function(){
-    Route::apiResource('question', 'QuestionController');
-    Route::apiResource('category', 'CategoryController');
+Route::post('auth/login','AuthController@login');
+Route::post('auth/signup','AuthController@signup');
+Route::middleware('auth:api')->group(function(){
+    // Route::group([],function(){
+    Route::apiResource('category', 'CategoryController')->except('index');
     Route::apiResource('question/{question}/reply','ReplyController');    
-    Route::apiResource('reply/{reply}/like','LikeController')->except(['update','show']);
+    Route::apiResource('question', 'QuestionController')->except('index');
+    Route::post('reply/{reply}/like','LikeController@store');
+    Route::delete('reply/{reply}/like','LikeController@destroy');
+    Route::get('user/question','QuestionController@userQuestions');
 });

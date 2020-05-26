@@ -2,7 +2,7 @@
 
 namespace App\Http\Controllers;
 
-use App\Question;
+use App\{Question,Category};
 use Illuminate\Http\Request;
 use App\Http\Requests\QuestionRequest;
 use Illuminate\Http\Response;
@@ -15,9 +15,26 @@ class QuestionController extends Controller
      *
      * @return \Illuminate\Http\Response
      */
+
+    public function userQuestions()
+    {
+        $data['questions']=QuestionResource::collection(auth()->user()->questions()->latest()->paginate(10));
+        $data['pagination']=$this->paginateQuestions($data['questions']);        
+        return response($data,Response::HTTP_OK) ;
+    }
+
+    
+     public function getCategorized(Category $category)
+    {
+        $data['questions']=QuestionResource::collection($category->questions()->latest()->paginate(10));
+        $data['pagination']=$this->paginateQuestions($data['questions']);
+        
+        return response($data,Response::HTTP_OK) ;
+    }
     public function index()
     {
-        $data['questions']= QuestionResource::collection(Question::latest()->get());
+        $data['questions']= QuestionResource::collection(Question::latest()->paginate(15));
+        $data['pagination']=$this->paginateQuestions($data['questions']);
         return response($data,Response::HTTP_OK) ;
     }
 
@@ -30,7 +47,8 @@ class QuestionController extends Controller
     public function store(QuestionRequest $request)
     {
         //create
-        Question::create($request);
+        $user=auth()->user();
+        $user->questions()->create($request->all());
         $data['message']='question created successfully';
         return response()->json($data,Response::HTTP_CREATED);
 
@@ -45,7 +63,7 @@ class QuestionController extends Controller
     public function show(Question $question)
     {
         $data['question']=new QuestionResource($question);
-        return response()->json($data,Response::HTTP_FOUND);
+        return response()->json($data,Response::HTTP_OK);
     }
 
     /**
@@ -59,6 +77,7 @@ class QuestionController extends Controller
     {
         $question->update($request->all());
         $data['message']="Updated Successfully";
+        $data['question']=$question;
         return response()->json($data,Response::HTTP_ACCEPTED);
     }
 
@@ -73,5 +92,19 @@ class QuestionController extends Controller
         $question->delete();
         $data['message']="Deleted Successfully";
         return response($data,Response::HTTP_NO_CONTENT);
+    }
+
+    private function paginateQuestions($questions)
+    {
+        
+        return[
+            'total'=>$questions->total(),
+            'perPage'=>$questions->perPage(),
+            'currentPage'=>$questions->currentPage(),
+            'lastPage'=>$questions->lastPage(),
+            'firstItem'=>$questions->firstItem(),
+            'lastItem'=>$questions->lastItem(),
+        ];
+        
     }
 }

@@ -30,8 +30,10 @@ class CategoryController extends Controller
     public function store(CategoryRequest $request)
     {
         //
-        Category::create($request);
+        // return response()->json($request,Response::HTTP_CREATED);
+        $category=Category::create($request->all());
         $data['message']='category created successfully';
+        $data['category']=$category;
         return response()->json($data,Response::HTTP_CREATED);
 
     }
@@ -56,9 +58,10 @@ class CategoryController extends Controller
      * @param  \App\Category  $category
      * @return \Illuminate\Http\Response
      */
-    public function update(CategoryRequest $request, Category $category)
+    public function update(CategoryRequest $request,$category_slug)
     {
-        $category->update($request->all());
+        $category=Category::where('slug',$category_slug)->firstOrFail();
+        $category->update($request->all(['name']));
         $data['message']="Updated Successfully";
         return response()->json($data,Response::HTTP_ACCEPTED);
     }
@@ -69,8 +72,9 @@ class CategoryController extends Controller
      * @param  \App\Category  $category
      * @return \Illuminate\Http\Response
      */
-    public function destroy(Category $category)
+    public function destroy( $category_slug)
     {
+        $category=Category::where('slug',$category_slug)->firstOrFail();
         $category->delete();
         $data['message']="Deleted Successfully";
         return response($data,Response::HTTP_NO_CONTENT);

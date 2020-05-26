@@ -23,9 +23,17 @@ class CategoryRequest extends FormRequest
      */
     public function rules()
     {
-        return [
-            'name'=>'required',
-            'slug'=>'required|unique:categories.slug',
-        ];
+        if($this->method()=='POST'){
+            return [
+                'name'=>'required|unique:categories,name',
+                'slug'=>'required|unique:categories,slug',
+            ];            
+        }
+        else{
+            return [
+                'name'=>'required',
+            ];
+        }
+        
     }
 }

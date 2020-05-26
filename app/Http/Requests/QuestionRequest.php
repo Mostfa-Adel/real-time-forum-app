@@ -24,11 +24,21 @@ class QuestionRequest extends FormRequest
      */
     public function rules()
     {
-        return [
-            'title'=>'required',
-            'body'=>'required',
-            'slug'=>'required|unique:questions',
-            'category_id'=>'required'
-        ];
+        if($this->method()=='POST'){
+            return [
+                'title'=>'required',
+                'body'=>'required',
+                'slug'=>'required|unique:questions',
+                'category_id'=>'required'
+            ];            
+        }
+        else{
+            return [
+                'title'=>'required',
+                'body'=>'required',
+                'category_id'=>'required'
+            ];
+        }
+        
     }
 }

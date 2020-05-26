@@ -26,22 +26,32 @@ class LikeController extends Controller
             'reply_id'=>$reply->id,
         ];
         $data['message']='Like created before that!';
-        if(! Like::where($like_data)->first()){
+        if(! $this->isUserLiked($reply)){
             Like::create($like_data);
             $data['message']='Like created successfully';
         }
         return response()->json($data,Response::HTTP_CREATED);
     }
-
+    
     
 
-    public function destroy(Reply $reply, Like $like)
+    public function destroy(Reply $reply)
     {
-        //authorize
+        $like=$this->isUserLiked($reply);
         $this->authorize('can_change', $like);
-
+        
         $like->delete();
         $data['message']='Like removed successfully';
         return response()->json($data,Response::HTTP_NO_CONTENT);
+    }
+
+    private function isUserLiked($reply)
+    {
+        $like_data=[
+            'user_id'=>auth()->id(),
+            'reply_id'=>$reply->id,
+        ];
+        return Like::where($like_data)->first();
+        
     }
 }

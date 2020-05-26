@@ -32,7 +32,8 @@ class ReplyController extends Controller
         $question_data['user_id']=auth()->user()->id;
         $question_data['question_id']=$question->id;
         $question_data=array_merge($request->all(), $question_data);
-        Reply::create($question_data);
+        $reply=Reply::create($question_data);
+        $data['reply']=new ReplyResource($reply);
         $data['message']='Reply created successfully';
         return response()->json($data,Response::HTTP_CREATED);
     }
@@ -60,7 +61,7 @@ class ReplyController extends Controller
     public function update(ReplyRequest $request,Question $question ,Reply $reply)
     {
         $this->authorize('update', $reply);
-        $reply->update($request->all());
+        $reply->update($request->all(['body']));
         $data['message']="Updated Successfully";
         return response()->json($data,Response::HTTP_ACCEPTED);
     }
@@ -71,7 +72,7 @@ class ReplyController extends Controller
      * @param  \App\Reply  $reply
      * @return \Illuminate\Http\Response
      */
-    public function destroy($question, Reply $reply)
+    public function destroy(Question $question, Reply $reply)
     {
         //TODO
         //test for authorization

@@ -2,8 +2,10 @@
 
 namespace App\Http\Controllers;
 
+use App\User;
 use Illuminate\Http\Response;
 use Illuminate\Http\Request;
+use Tymon\JWTAuth\Contracts\Providers\Auth;
 
 class AuthController extends Controller
 {
@@ -26,16 +28,13 @@ class AuthController extends Controller
     public function signup(Request $request){
         //validate
         $request->validate([
+            'name'=>"required",
             'email'=>"required|email|unique:users",
             'password'=>"required|confirmed|min:6",
         ]);
-        //attempt to login
-        \App\User::create($request);
-        $credintials=request(["email",'password']);
-        if(! $token=auth()->attempt($credintials)){
-            $data["message"]='Not valid credintials';
-            return response()->json([$data],Response::HTTP_UNAUTHORIZED);
-        }
+        // create new user
+        $user=User::create($request->all());
+        $token=auth()->login($user);
         return $this->respondWithToken($token);
     }
 
@@ -50,7 +49,8 @@ class AuthController extends Controller
         return response()->json([
             'access_token' => $token,
             'token_type' => 'bearer',
-            'expires_in' => auth()->factory()->getTTL() * 60
+            'expires_in' => auth()->factory()->getTTL() * 60,
+            'username'=>auth()->user()->name
         ]);
     }   
 }
